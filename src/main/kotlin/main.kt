@@ -96,17 +96,18 @@ fun main() {
                                 } else {
                                     getAuthor(post.authorId)
                                 }
-                            val postsWithAuthor = postsWithAuthor+PostWithAuthor(post, author)
+                            val postsWithAuthor = postsWithAuthor + PostWithAuthor(post, author)
                         }
+                    }.awaitAll()
 
-                        async {
-                            postsWithAuthor.map { postWithAuthor ->
-                                    result=result+PostWithComments(postWithAuthor, comments = getComments(postWithAuthor.post.id).map{
-                                        CommentWithAuthor(it, setAuthor(authors,it))
-                                    })
-                                }
-                            }
-                        }.awaitAll()
+                postsWithAuthor.map { postWithAuthor ->
+                    async {
+                        result=result+PostWithComments(postWithAuthor, comments = getComments(postWithAuthor.post.id)
+                            .map{
+                            CommentWithAuthor(it, setAuthor(authors,it))
+                        })
+                    }
+                }.awaitAll()
                 println(result)
             } catch (e: Exception) {
                 e.printStackTrace()
